@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Card for Mummy Thapar</title>
+    <!-- Fallback fonts included in case of no internet -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <script>
+        // Image error handler defined in head to prevent ReferenceError
+        function handleImageError(img) {
+            img.style.display = 'none';
+            const parent = img.parentElement;
+            const errorMsg = document.createElement('div');
+            errorMsg.innerText = "Check your folder: 'image_5aa36f.jpg' missing!";
+            errorMsg.style.color = "red";
+            errorMsg.style.padding = "20px";
+            errorMsg.style.textAlign = "center";
+            errorMsg.style.fontWeight = "bold";
+            parent.prepend(errorMsg);
+        }
+    </script>
+    <style>
+        :root {
+            --card-width: 320px;
+            --card-height: 450px;
+            --bg-color: #f3f4f6;
+            --paper-color: #fffef2;
+            --crayon-blue: #0052FF;
+            --peacock-blue: #00b4d8;
+            --peacock-dark: #023e8a;
+            --peacock-eye: #caf0f8;
+            --peacock-gold: #fb8500;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Patrick Hand', 'Comic Sans MS', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            perspective: 2500px;
+        }
+
+        .card-container {
+            position: relative;
+            width: var(--card-width);
+            height: var(--card-height);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card-container.is-open {
+            transform: translateX(160px);
+        }
+
+        /* The Left Flap (Front -> Cake) */
+        .flap-left {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            transform-style: preserve-3d;
+            transform-origin: left;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+            cursor: pointer;
+        }
+
+        .card-container.is-open .flap-left {
+            transform: rotateY(-180deg);
+            z-index: 1; 
+        }
+
+        /* The Right Flap (Message -> Surprise Photo on back) */
+        .flap-right {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            transform-style: preserve-3d;
+            transform-origin: left;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+
+        .card-container.is-surprise .flap-right {
+            transform: rotateY(-180deg);
+            z-index: 4;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--paper-color);
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 2px 2px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backface-visibility: hidden;
+            border-radius: 2px;
+            box-sizing: border-box;
+        }
+
+        .page-front { z-index: 2; }
+        .page-cake { transform: rotateY(180deg); z-index: 1; }
+        .page-message { z-index: 2; }
+        .page-back { transform: rotateY(180deg); z-index: 1; background: #fff; }
+
+        .crayon-text {
+            font-family: 'Caveat', cursive;
+            line-height: 1.1;
+            text-align: center;
+            color: var(--crayon-blue);
+        }
+
+        .broken-text span {
+            display: inline-block;
+            transform: rotate(var(--rot));
+            margin: 0 -1px;
+        }
+
+        .title { font-size: 2.2rem; margin-bottom: 1rem; }
+        .bold { font-weight: bold; }
+
+        /* Peacocks - Realistic & Identical */
+        .peacock {
+            position: absolute;
+            bottom: -15px;
+            width: 140px;
+            height: 140px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .card-container.is-open .peacock { opacity: 1; }
+        .peacock-left { left: -15px; animation: p-dance 0.5s infinite alternate ease-in-out; }
+        .peacock-right { right: -15px; transform: scaleX(-1); animation: p-dance-r 0.5s infinite alternate ease-in-out; }
+
+        @keyframes p-dance { 0% { transform: translate(0, 0) rotate(-3deg); } 100% { transform: translate(8px, -25px) rotate(8deg); } }
+        @keyframes p-dance-r { 0% { transform: scaleX(-1) translate(0, 0) rotate(-3deg); } 100% { transform: scaleX(-1) translate(8px, -25px) rotate(8deg); } }
+
+        /* Polaroid Memory */
+        .photo-polaroid {
+            background: white;
+            padding: 10px 10px 45px 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: rotate(-1.5deg);
+            max-width: 95%;
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .photo-polaroid img {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Scribbles */
+        .doodle-crayon {
+            position: absolute;
+            stroke: var(--crayon-blue);
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+        }
+        .pos-tl { top: 1rem; left: 1rem; width: 3rem; height: 3rem; }
+        .pos-tr { top: 1rem; right: 1rem; width: 3rem; height: 3rem; }
+        .pos-bl { bottom: 1rem; left: 1rem; width: 3rem; height: 3rem; }
+        .pos-br { bottom: 1rem; right: 1rem; width: 3rem; height: 3rem; }
+
+        .btn-surprise {
+            background: #ff595e;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 1rem;
+            margin: 15px 0;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(255,89,94,0.3);
+            font-family: inherit;
+        }
+        
+        .btn-interact {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            z-index: 100;
+            font-weight: bold;
+            color: #555;
+            border: none;
+        }
+
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 300; }
+        .instruction { position: absolute; top: -60px; width: 100%; text-align: center; color: #888; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} }
+        
+        .mt-4 { margin-top: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .px-6 { padding: 0 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <audio id="surpriseSong" loop preload="auto">
+        <source src="birthday-gift-full-video-sharry-mann-mista-baaz-kaptaan-latest-punjabi-songs-2_KHXvv9Z4.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="card" class="card-container">
+        
+        <!-- Left Flap -->
+        <div class="flap-left" id="flapLeft" onclick="toggleOpen()">
+            <div class="card-face page-front">
+                <div class="instruction">Click to open!</div>
+                <svg class="doodle-crayon pos-tl" viewBox="0 0 50 50"><path d="M10 10 L25 20 L15 30 L35 40" /></svg>
+                <svg class="doodle-crayon pos-tr" viewBox="0 0 50 50"><path d="M10 40 L25 30 L15 20 L35 10" /></svg>
+                <svg class="doodle-crayon pos-bl" viewBox="0 0 50 50"><path d="M10 10 L25 20 L15 30 L35 40" /></svg>
+                <svg class="doodle-crayon pos-br" viewBox="0 0 50 50"><path d="M10 40 L25 30 L15 20 L35 10" /></svg>
+
+                <div class="crayon-text mb-6">
+                    <h1 class="title broken-text">
+                        <span style="--rot: -5deg">h</span><span style="--rot: 3deg">a</span><span style="--rot: -2deg">p</span><span style="--rot: 2deg">p</span><span style="--rot: 4deg">y</span><br>
+                        <span style="--rot: 2deg">b</span><span style="--rot: -3deg">i</span><span style="--rot: 5deg">r</span><span style="--rot: -1deg">t</span><span style="--rot: 2deg">h</span><span style="--rot: -4deg">d</span><span style="--rot: 3deg">a</span><span style="--rot: 1deg">y</span><br>
+                        <span style="--rot: -2deg">m</span><span style="--rot: 4deg">u</span><span style="--rot: -3deg">m</span><span style="--rot: 1deg">m</span><span style="--rot: -5deg">y</span><br>
+                        <span style="--rot: 3deg">t</span><span style="--rot: -2deg">h</span><span style="--rot: 4deg">a</span><span style="--rot: -1deg">p</span><span style="--rot: 2deg">a</span><span style="--rot: -4deg">r</span>
+                    </h1>
+                </div>
+
+                <!-- Stick figure with eyes -->
+                <svg style="width:160px; height:192px; stroke: var(--crayon-blue); stroke-width: 3; fill: none;" viewBox="0 0 100 120">
+                    <path d="M40 30 L60 30 L50 10 Z" /> 
+                    <rect x="35" y="30" width="30" height="30" /> 
+                    <circle cx="43" cy="42" r="2.5" fill="var(--crayon-blue)" />
+                    <circle cx="57" cy="42" r="2.5" fill="var(--crayon-blue)" />
+                    <path d="M42 50 Q50 58 58 50" /> 
+                    <path d="M35 60 L65 60 L70 90 L30 90 Z" /> 
+                    <line x1="32" y1="70" x2="20" y2="75" /> 
+                    <line x1="68" y1="70" x2="80" y2="75" /> 
+                    <line x1="42" y1="90" x2="40" y2="105" /> 
+                    <line x1="58" y1="90" x2="60" y2="105" />
+                </svg>
+            </div>
+
+            <div class="card-face page-cake">
+                <svg class="doodle-crayon pos-tl" viewBox="0 0 50 50"><path d="M10 10 L25 20 L15 30 L35 40" /></svg>
+                <svg class="doodle-crayon pos-tr" viewBox="0 0 50 50"><path d="M10 40 L25 30 L15 20 L35 10" /></svg>
+                <svg class="doodle-crayon pos-bl" viewBox="0 0 50 50"><path d="M10 10 L25 20 L15 30 L35 40" /></svg>
+                <svg class="doodle-crayon pos-br" viewBox="0 0 50 50"><path d="M10 40 L25 30 L15 20 L35 10" /></svg>
+
+                <svg style="width:192px; height:192px; stroke: var(--crayon-blue); stroke-width: 2.5; fill: none;" viewBox="0 0 100 100">
+                    <rect x="30" y="40" width="40" height="25" /><rect x="25" y="65" width="50" height="25" />
+                    <text x="45" y="58" font-family="cursive" font-size="14" font-weight="bold" fill="var(--crayon-blue)" style="stroke:none">5</text>
+                    <text x="45" y="83" font-family="cursive" font-size="14" font-weight="bold" fill="var(--crayon-blue)" style="stroke:none">0</text>
+                    <line x1="50" y1="40" x2="50" y2="30" /><ellipse cx="50" cy="25" rx="3" ry="5" />
+                </svg>
+                <p class="crayon-text mt-4 bold" style="font-size: 1.5rem;">Happy 50th Birthday!</p>
+                
+                <svg class="peacock peacock-left" viewBox="0 0 120 120">
+                    <defs><radialGradient id="eyevv" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#caf0f8" /><stop offset="60%" style="stop-color:#00b4d8" /><stop offset="100%" style="stop-color:#023e8a" /></radialGradient></defs>
+                    <g transform="translate(60,110)"><path d="M-50,-80 Q0,-120 50,-80 L0,0 Z" fill="#2d6a4f" opacity="0.6" /><circle cx="-35" cy="-85" r="5" fill="url(#eyevv)" /><circle cx="-15" cy="-105" r="6" fill="url(#eyevv)" /><circle cx="15" cy="-105" r="6" fill="url(#eyevv)" /><circle cx="35" cy="-85" r="5" fill="url(#eyevv)" /></g>
+                    <path d="M60 110 Q45 105 45 80 C45 60 55 50 55 35" stroke="#023e8a" stroke-width="10" fill="none" stroke-linecap="round" />
+                    <circle cx="55" cy="30" r="7" fill="#023e8a" /><path d="M52 24 L50 18 M55 22 L55 16 M58 24 L60 18" stroke="#00b4d8" stroke-width="2" /><path d="M62 30 L68 33 L62 36 Z" fill="#fb8500" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Right Flap -->
+        <div class="flap-right" id="flapRight">
+            <div class="card-face page-message">
+                <svg class="doodle-crayon pos-tl" viewBox="0 0 50 50"><path d="M10 10 L25 20 L15 30 L35 40" /></svg>
+                <svg class="doodle-crayon pos-tr" viewBox="0 0 50 50"><path d="M10 40 L25 30 L15 20 L35 10" /></svg>
+                
+                <div class="crayon-text px-6">
+                    <h2 style="font-size:2rem; font-weight:bold; margin-bottom:1rem;">MUMMY THAPAR</h2>
+                    <p style="font-size:1.2rem;">thankyou for being my bestfriend,</p>
+                    <p style="font-size:1.2rem;">i am so lucky to have you.</p>
+                    <p style="font-size:1.2rem; margin-top:1rem; font-style:italic; font-weight:bold;">cant wait to peacock dance withyou.</p>
+                    <button class="btn-surprise" onclick="toggleSurprise(event)">click for a surprise</button>
+                    <div style="margin-top:2rem;">
+                        <p style="font-size:1.1rem;">Love,</p>
+                        <p style="font-size:1.8rem; font-weight:bold;">Arjun</p>
+                    </div>
+                </div>
+
+                <svg class="peacock peacock-right" viewBox="0 0 120 120">
+                    <g transform="translate(60,110)"><path d="M-50,-80 Q0,-120 50,-80 L0,0 Z" fill="#2d6a4f" opacity="0.6" /><circle cx="-35" cy="-85" r="5" fill="url(#eyevv)" /><circle cx="-15" cy="-105" r="6" fill="url(#eyevv)" /><circle cx="15" cy="-105" r="6" fill="url(#eyevv)" /><circle cx="35" cy="-85" r="5" fill="url(#eyevv)" /></g>
+                    <path d="M60 110 Q45 105 45 80 C45 60 55 50 55 35" stroke="#023e8a" stroke-width="10" fill="none" stroke-linecap="round" />
+                    <circle cx="55" cy="30" r="7" fill="#023e8a" /><path d="M52 24 L50 18 M55 22 L55 16 M58 24 L60 18" stroke="#00b4d8" stroke-width="2" /><path d="M62 30 L68 33 L62 36 Z" fill="#fb8500" />
+                </svg>
+            </div>
+
+            <div class="card-face page-back">
+                <div class="photo-polaroid">
+                    <img src="image_5aa36f.jpg" alt="Arjun and Mom" id="surprisePhoto" onerror="handleImageError(this)">
+                    <div class="crayon-text mt-4">
+                        <p style="font-size:1.5rem; font-weight:bold;">Together Forever!</p>
+                    </div>
+                </div>
+                <button class="mt-4" style="color:gray; border:none; background:none; text-decoration:underline; cursor:pointer;" onclick="toggleSurprise(event)">Go back</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-interact" id="closeBtn" onclick="resetCard()" style="display:none">Close Card</button>
+    <canvas id="confetti-canvas"></canvas>
+
+    <script>
+        let isOpen = false;
+        let isSurprise = false;
+        const card = document.getElementById('card');
+        const closeBtn = document.getElementById('closeBtn');
+        const song = document.getElementById('surpriseSong');
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function toggleOpen() {
+            if (isOpen || isSurprise) return;
+            isOpen = true;
+            card.classList.add('is-open');
+            closeBtn.style.display = 'block';
+            startConfetti();
+            
+            // Safer priming: call play and handle promise, 
+            // but don't pause immediately to avoid AbortError.
+            const playPromise = song.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Only pause if we aren't supposed to be playing right now
+                    if (!isSurprise) {
+                        song.pause();
+                        song.currentTime = 0;
+                    }
+                }).catch(error => {
+                    console.log("Audio priming skipped:", error.message);
+                });
+            }
+        }
+
+        function toggleSurprise(e) {
+            e.stopPropagation();
+            isSurprise = !isSurprise;
+            if (isSurprise) {
+                card.classList.add('is-surprise');
+                startConfetti();
+                // Delay play slightly to allow transition to start
+                setTimeout(() => {
+                    if (isSurprise) { // Check again to ensure they didn't flip back immediately
+                        const playPromise = song.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => console.log("Play interrupted:", error.message));
+                        }
+                    }
+                }, 500);
+            } else {
+                card.classList.remove('is-surprise');
+                song.pause();
+            }
+        }
+
+        function resetCard() {
+            isOpen = false;
+            isSurprise = false;
+            card.classList.remove('is-open', 'is-surprise');
+            closeBtn.style.display = 'none';
+            song.pause();
+            song.currentTime = 0;
+        }
+
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function createParticle() {
+            return {
+                x: Math.random() * canvas.width,
+                y: -20,
+                size: Math.random() * 8 + 4,
+                color: ['#0052FF', '#00b4d8', '#ff595e', '#ffca3a'][Math.floor(Math.random() * 4)],
+                speedX: Math.random() * 3 - 1.5,
+                speedY: Math.random() * 3 + 2,
+                rotation: Math.random() * 360,
+                rotationSpeed: Math.random() * 10 - 5
+            };
+        }
+
+        function startConfetti() {
+            particles = [];
+            for (let i = 0; i < 80; i++) {
+                setTimeout(() => { particles.push(createParticle()); }, i * 15);
+            }
+        }
+
+        function updateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.speedX; p.y += p.speedY; p.rotation += p.rotationSpeed;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                ctx.restore();
+                if (p.y > canvas.height) { particles.splice(i, 1); i--; }
+            }
+            requestAnimationFrame(updateParticles);
+        }
+        updateParticles();
+    </script>
+</body>
+</html>
